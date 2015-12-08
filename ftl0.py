@@ -13,13 +13,13 @@ ls	= light_sensor();	assert ls.connected
 cs.mode = 'COL-REFLECT'
 
 def get_reading(color):
-    sound.speak("Show me %s!" % color, True)
-    while not ts.value(): time.sleep(0.1)
-    v = cs.value()
-    v1 = ls.value()
-    print("%s: %s, %s" %(color, v, (9*v1)/100-15)
-    sound.speak("OK", True)
-    return v
+	sound.speak("Show me %s!" % color, True)
+	while not ts.value(): time.sleep(0.1)
+	v = cs.value()
+	v1 = ls.value()
+	print("%s: %s, %s" %(color, v, (9*v1)/100-15)
+	sound.speak("OK", True)
+	return v
 
 print("Nasz FTL")
 white = get_reading('white')
@@ -33,16 +33,16 @@ last_error = 0
 integral   = 0
 
 while not ts.value():
-    csV = cs.value()
-    lsV = 9*ls.value()/100-15
-    error      = mid - csV
-    integral   = 0.5 * integral + error
-    derivative = error - last_error
-    last_error = error
+	csV = cs.value()
+	lsV = 9*ls.value()/100-15
+	error      = mid - csV
+	integral   = 0.5 * integral + error
+	derivative = error - last_error
+	last_error = error
 
-    correction = int(3.0 * error)# + 0.5 * integral + 2.0 * derivative)
+	correction = int(3.0 * error)# + 0.5 * integral + 2.0 * derivative)
 
-    #lmotor.run_forever(speed_sp=500+correction)
-    #rmotor.run_forever(speed_sp=500-correction)
+	#lmotor.run_forever(speed_sp=500+correction)
+	#rmotor.run_forever(speed_sp=500-correction)
 
-    time.sleep(0.01)
+	time.sleep(0.01)

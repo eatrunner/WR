@@ -34,7 +34,7 @@ integral   = 0
 
 while not ts.value():
     csV = cs.value()
-    lsV = int(9*ls.value()/100 -15)
+    lsV = 9*ls.value()/100-15
     error      = mid - csV
     integral   = 0.5 * integral + error
     derivative = error - last_error
