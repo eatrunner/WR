@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#lewa color_sensor prawa light_sensor
 
 import sys, argparse, time
 from ev3dev import *
@@ -8,7 +9,7 @@ lmotor = large_motor(OUTPUT_C); assert lmotor.connected
 rmotor = large_motor(OUTPUT_B); assert rmotor.connected
 cs     = color_sensor();        assert cs.connected
 ts     = touch_sensor();        assert ts.connected
-ls	= light_sensor();	assert ls.connected
+ls     = light_sensor();        assert ls.connected
 
 cs.mode = 'COL-REFLECT'
 
@@ -16,8 +17,8 @@ def get_reading(color):
 	sound.speak("Show me %s!" % color, True)
 	while not ts.value(): time.sleep(0.1)
 	v = cs.value()
-	v1 = ls.value()
-	print("%s: %s, %s" %(color, v, (9*v1)/100-15)
+	v1 = 9*ls.value()/100-15
+	print("%s: %s, %s" %(color, v, v1))
 	sound.speak("OK", True)
 	return v
 
