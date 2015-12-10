@@ -23,9 +23,9 @@ def get_reading(color):
 	return v
 
 print("Nasz FTL")
-white = get_reading('white')
-black = get_reading('black')
-mid   = 0.5 * (white + black)
+#white = get_reading('white')
+#black = get_reading('black')
+white = 20
 
 lmotor.speed_regulation_enabled = 'on'
 rmotor.speed_regulation_enabled = 'on'
@@ -36,14 +36,17 @@ integral   = 0
 while not ts.value():
 	csV = cs.value()
 	lsV = 9*ls.value()/100-15
-	error      = mid - csV
+	if csV<lsV:
+		error= white - csV
+	else:
+		error=lsV - white
 	integral   = 0.5 * integral + error
 	derivative = error - last_error
 	last_error = error
 
-	correction = int(3.0 * error)# + 0.5 * integral + 2.0 * derivative)
-
-	#lmotor.run_forever(speed_sp=500+correction)
-	#rmotor.run_forever(speed_sp=500-correction)
+	correction = int(60 * error + 1 * integral + 2 * derivative)
+	#print("%s, %s" %(error, correction))
+	lmotor.run_forever(speed_sp=500+correction)
+	rmotor.run_forever(speed_sp=500-correction)
 
 	time.sleep(0.01)
