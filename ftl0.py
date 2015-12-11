@@ -17,15 +17,20 @@ def get_reading(color):
 	sound.speak("Show me %s!" % color, True)
 	while not ts.value(): time.sleep(0.1)
 	v = cs.value()
-	v1 = 9*ls.value()/100-15
+	v1 = 9*ls.value()/100-15	#na noc
+	#v1 = (5*ls.value()/56-13)	#na dzien
+	#v1 = 32*ls.value()/197-7692/197
 	print("%s: %s, %s" %(color, v, v1))
 	sound.speak("OK", True)
 	return v
 
 print("Nasz FTL")
-#white = get_reading('white')
-#black = get_reading('black')
-white = 20
+#for x in xrange(10):
+white = get_reading('white')
+black = get_reading('black')
+white = 21
+#white = 24
+#white = 36
 
 lmotor.speed_regulation_enabled = 'on'
 rmotor.speed_regulation_enabled = 'on'
@@ -35,7 +40,9 @@ integral   = 0
 
 while not ts.value():
 	csV = cs.value()
-	lsV = 9*ls.value()/100-15
+	lsV = 9*ls.value()/100-15	#na noc
+	#lsV=(5*ls.value()/56-13)	#na dzien
+	#lsV = 32*ls.value()/197-7692/197
 	if csV<lsV:
 		error= white - csV
 	else:
@@ -44,9 +51,9 @@ while not ts.value():
 	derivative = error - last_error
 	last_error = error
 
-	correction = int(60 * error + 1 * integral + 2 * derivative)
+	correction = int(65 * error + 1 * integral + 10 * derivative)
 	#print("%s, %s" %(error, correction))
 	lmotor.run_forever(speed_sp=500+correction)
 	rmotor.run_forever(speed_sp=500-correction)
 
-	time.sleep(0.01)
+	#time.sleep(0.00001)
