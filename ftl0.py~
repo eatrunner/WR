@@ -24,6 +24,23 @@ def get_reading(color):
 	sound.speak("OK", True)
 	return v
 
+def countCorrection():
+	global integral
+	global last_error
+	csV = cs.value()
+	lsV = 9*ls.value()/100-15	#na noc
+	#lsV=(5*ls.value()/56-13)	#na dzien
+	#lsV = 32*ls.value()/197-7692/197
+	if csV<lsV:
+		error= white - csV
+	else:
+		error=lsV - white
+	integral   = 0.5 * integral + error
+	derivative = error - last_error
+	last_error = error
+	correction = int(60 * error + 1 * integral + 20 * derivative)
+	return int(correction)
+
 print("Nasz FTL")
 #for x in xrange(10):
 white = get_reading('white')
@@ -39,21 +56,27 @@ last_error = 0
 integral   = 0
 
 while not ts.value():
-	csV = cs.value()
-	lsV = 9*ls.value()/100-15	#na noc
-	#lsV=(5*ls.value()/56-13)	#na dzien
-	#lsV = 32*ls.value()/197-7692/197
-	if csV<lsV:
-		error= white - csV
-	else:
-		error=lsV - white
-	integral   = 0.5 * integral + error
-	derivative = error - last_error
-	last_error = error
-
-	correction = int(70 * error + 1 * integral + 6 * derivative)
+	correction = countCorrection()
 	#print("%s, %s" %(error, correction))
-	lmotor.run_forever(speed_sp=500+correction)
-	rmotor.run_forever(speed_sp=500-correction)
+	if correction > 1000:
+		prvCorrection = 1000
+		print("%s" %prvCorrection)
+		correction = countCorrection()
+		while correction<prvCorrection and correction>-250:
+			lmotor.run_forever(speed_sp=500+prvCorrection)
+			rmotor.run_forever(speed_sp=500-prvCorrection)
+			correction = countCorrection()
+	
+	if correction < -1000:
+		prvCorrection = -1000
+		print("%s" %prvCorrection)
+		correction = countCorrection()
+		while correction>prvCorrection and correction<250:
+			lmotor.run_forever(speed_sp=500+prvCorrection)
+			rmotor.run_forever(speed_sp=500-prvCorrection)
+			correction = countCorrection()
+	if abs(correction) < 1000:
+		lmotor.run_forever(speed_sp=900+correction)
+		rmotor.run_forever(speed_sp=900-correction)
 
 	#time.sleep(0.00001)
