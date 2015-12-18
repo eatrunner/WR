@@ -27,10 +27,20 @@ def get_reading(color):
 def countCorrection():
 	global integral
 	global last_error
+	global differ
+	global lsV
+	global csV
+	a1=16
+	a2=187
+	b=-15
+	control = 0
 	csV = cs.value()
-	lsV = 9*ls.value()/100-15	#na noc
+	lsV = a1*ls.value()/a2+b
+	print("%s, %s" %(csV, lsV))
+	#lsV = 9*ls.value()/100-15	#na noc
 	#lsV=(5*ls.value()/56-13)	#na dzien
 	#lsV = 32*ls.value()/197-7692/197
+	differ = lsV - csV
 	if csV<lsV:
 		error= white - csV
 	else:
@@ -38,45 +48,136 @@ def countCorrection():
 	integral   = 0.5 * integral + error
 	derivative = error - last_error
 	last_error = error
-	correction = int(60 * error + 1 * integral + 20 * derivative)
+	if lsV<black and csV<black:
+		correction=0
+	else:
+		correction = int(60 * error + 2 * integral + 1 * derivative)
+		cotrol = int(20*derivative)
+		if control > 250:
+			correction = 1500
+		if control < -250:
+			correction = -1500
 	return int(correction)
 
+def get_colors():
+	#global a
+	global a1
+	global a2
+	global b
+	sound.speak("Show me white!", True)
+	while not ts.value(): time.sleep(0.1)
+	w1 = cs.value()
+	w2 = ls.value()
+	print("white: %s, %s" %(w1, w2))
+	sound.speak("OK", True)
+	sound.speak("Show me black!", True)
+	while not ts.value(): time.sleep(0.1)
+	b1 = cs.value()
+	b2 = ls.value()
+	print("black: %s, %s" %(b1, b2))
+	sound.speak("OK", True)
+	a1 = w1-b1
+	a2 = w2-b2
+	#a = (w1-b1)/(w2-b2)
+	b = w1-(w2*a1/a2)
+	#print("calculated white: %s, %s" %(w1, w2*a+b))
+	#print("calculated black: %s, %s" %(b1, b2*a+b))
+	#print("a: %s, b: %s" %(a, b))
+	print("calculated white: %s, %s" %(w1, w2*a1/a2+b))
+	print("calculated black: %s, %s" %(b1, b2*a1/a2+b))
+	print("a1: %s, a2: %s, b: %s" %(a1, a2, b))
+	return w1
+
+def calculate():
+	global a1
+	global a2
+	global b
+	w1 = [0,0,0,0,0,0,0,0,0,0]
+	w2 = [0,0,0,0,0,0,0,0,0,0]
+	b1 = [0,0,0,0,0,0,0,0,0,0]
+	b2 = [0,0,0,0,0,0,0,0,0,0]
+	w1sum = 0
+	w2sum = 0
+	b1sum = 0
+	b2sum = 0
+	for x in range(10):
+		sound.speak("Show me white!", True)
+		while not ts.value(): time.sleep(0.1)
+		w1[x] = cs.value()
+		w2[x] = ls.value()
+		print("white.%s: %s, %s" %(x, w1[x], w2[x]))
+		sound.speak("OK", True)
+		if ts.value():
+			exit()
+	for y in range(10):
+		sound.speak("Show me black!", True)
+		while not ts.value(): time.sleep(0.1)
+		b1[y] = cs.value()
+		b2[y] = ls.value()
+		print("black.%s: %s, %s" %(y, b1[y], b2[y]))
+		sound.speak("OK", True)
+		if ts.value():
+			exit()
+	for z in range(10):
+		w1sum = w1sum + w1[z]
+		w2sum = w2sum + w2[z]
+		b1sum = b1sum + b1[z]
+		b2sum = b2sum + b2[z]
+	w1sum = w1sum/10
+	w2sum = w2sum/10
+	b1sum = b1sum/10
+	b2sum = b2sum/10
+	a1 = w1sum-b1sum
+	a2 = w2sum-b2sum
+	b = w1sum-(w2sum*a1/a2)
+	print("a1: %s, a2: %s, b: %s" %(a1, a2, b))
+	return w1sum
+
 print("Nasz FTL")
+#white = calculate()
+#17 199 -14
+#16 187 -14
+#white = get_colors()
 #for x in xrange(10):
-white = get_reading('white')
-black = get_reading('black')
+#white = get_reading('white')
+#black = get_reading('black')
 white = 21
 #white = 24
 #white = 36
+black = 9
 
 lmotor.speed_regulation_enabled = 'on'
 rmotor.speed_regulation_enabled = 'on'
 
 last_error = 0
 integral   = 0
-
+differ = 0
+lsV=0
+csV=0
 while not ts.value():
 	correction = countCorrection()
 	#print("%s, %s" %(error, correction))
-	if correction > 1000:
-		prvCorrection = 1000
-		print("%s" %prvCorrection)
+	if correction > 1100:
+		prvCorrection = 700
+		#print("%s" %prvCorrection)
 		correction = countCorrection()
-		while correction<prvCorrection and correction>-250:
-			lmotor.run_forever(speed_sp=500+prvCorrection)
-			rmotor.run_forever(speed_sp=500-prvCorrection)
+		while correction>-400:
+			lmotor.run_forever(speed_sp=400)
+			rmotor.run_forever(speed_sp=-200)
 			correction = countCorrection()
 	
-	if correction < -1000:
-		prvCorrection = -1000
-		print("%s" %prvCorrection)
+	if correction < -1100:
+		prvCorrection = -700
+		#print("%s" %prvCorrection)
 		correction = countCorrection()
-		while correction>prvCorrection and correction<250:
-			lmotor.run_forever(speed_sp=500+prvCorrection)
-			rmotor.run_forever(speed_sp=500-prvCorrection)
+		while correction<400:
+			lmotor.run_forever(speed_sp=-200)
+			rmotor.run_forever(speed_sp=400)
 			correction = countCorrection()
-	if abs(correction) < 1000:
-		lmotor.run_forever(speed_sp=700+correction)
-		rmotor.run_forever(speed_sp=700-correction)
+	if abs(correction) < 1100:
+		lmotor.run_forever(speed_sp=500+correction)
+		rmotor.run_forever(speed_sp=500-correction)
+		if correction == 0:
+			time.sleep(0.1)
 
 	#time.sleep(0.00001)
