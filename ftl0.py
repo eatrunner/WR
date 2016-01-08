@@ -10,8 +10,10 @@ rmotor = large_motor(OUTPUT_B); assert rmotor.connected
 cs     = color_sensor();        assert cs.connected
 ts     = touch_sensor();        assert ts.connected
 ls     = light_sensor();        assert ls.connected
+ir     = infrared_sensor();     assert ir.connected
 
 cs.mode = 'COL-REFLECT'
+ir.mode = 'IR-PROX'
 
 def get_reading(color):
 	sound.speak("Show me %s!" % color, True)
@@ -31,12 +33,12 @@ def countCorrection():
 	global lsV
 	global csV
 	a1=16
-	a2=187
+	a2=181
 	b=-15
 	control = 0
 	csV = cs.value()
 	lsV = a1*ls.value()/a2+b
-	print("%s, %s" %(csV, lsV))
+	#print("%s, %s" %(csV, lsV))
 	#lsV = 9*ls.value()/100-15	#na noc
 	#lsV=(5*ls.value()/56-13)	#na dzien
 	#lsV = 32*ls.value()/197-7692/197
@@ -51,8 +53,8 @@ def countCorrection():
 	if lsV<black and csV<black:
 		correction=0
 	else:
-		correction = int(60 * error + 2 * integral + 1 * derivative)
-		cotrol = int(20*derivative)
+		correction = int(50 * error + 1 * integral + 1 * derivative)
+		control = int(13*error)
 		if control > 250:
 			correction = 1500
 		if control < -250:
@@ -133,6 +135,41 @@ def calculate():
 	print("a1: %s, a2: %s, b: %s" %(a1, a2, b))
 	return w1sum
 
+def obstacle():
+	#stop
+	lmotor.run_forever(speed_sp=0)
+	rmotor.run_forever(speed_sp=0)
+	time.sleep(0.1)
+	#turnLeft
+	lmotor.run_forever(speed_sp=500)
+	rmotor.run_forever(speed_sp=0)
+	time.sleep(0.9)
+	#goForward
+	lmotor.run_forever(speed_sp=500)
+	rmotor.run_forever(speed_sp=500)
+	time.sleep(0.7)
+	#turnRight
+	lmotor.run_forever(speed_sp=0)
+	rmotor.run_forever(speed_sp=500)
+	time.sleep(0.9)
+	#goForward
+	lmotor.run_forever(speed_sp=500)
+	rmotor.run_forever(speed_sp=500)
+	time.sleep(1.3)
+	#turnRight
+	lmotor.run_forever(speed_sp=0)
+	rmotor.run_forever(speed_sp=500)
+	time.sleep(0.8)
+	#goForward
+	lmotor.run_forever(speed_sp=500)
+	rmotor.run_forever(speed_sp=500)
+	time.sleep(0.7)
+	
+	#turnLeft
+	lmotor.run_forever(speed_sp=500)
+	rmotor.run_forever(speed_sp=-500)
+	time.sleep(0.4)
+
 print("Nasz FTL")
 #white = calculate()
 #17 199 -14
@@ -155,6 +192,8 @@ differ = 0
 lsV=0
 csV=0
 while not ts.value():
+	if ir.value()<5:
+		obstacle()
 	correction = countCorrection()
 	#print("%s, %s" %(error, correction))
 	if correction > 1100:
@@ -178,6 +217,7 @@ while not ts.value():
 		lmotor.run_forever(speed_sp=500+correction)
 		rmotor.run_forever(speed_sp=500-correction)
 		if correction == 0:
-			time.sleep(0.1)
+			time.sleep(0.2)
+	
 
 	#time.sleep(0.00001)
