@@ -32,9 +32,9 @@ def countCorrection():
 	global differ
 	global lsV
 	global csV
-	a1=16
-	a2=181
-	b=-15
+	a1=18
+	a2=196
+	b=-17
 	control = 0
 	csV = cs.value()
 	lsV = a1*ls.value()/a2+b
@@ -136,39 +136,43 @@ def calculate():
 	return w1sum
 
 def obstacle():
+	global a1
+	global a2
+	global b
 	#stop
 	lmotor.run_forever(speed_sp=0)
 	rmotor.run_forever(speed_sp=0)
 	time.sleep(0.1)
 	#turnLeft
-	lmotor.run_forever(speed_sp=500)
-	rmotor.run_forever(speed_sp=0)
-	time.sleep(0.9)
+	lmotor.run_forever(speed_sp=2000)
+	rmotor.run_forever(speed_sp=-500)
+	time.sleep(0.3)
 	#goForward
-	lmotor.run_forever(speed_sp=500)
-	rmotor.run_forever(speed_sp=500)
-	time.sleep(0.7)
+	lmotor.run_forever(speed_sp=2000)
+	rmotor.run_forever(speed_sp=2000)
+	time.sleep(0.5)
 	#turnRight
 	lmotor.run_forever(speed_sp=0)
-	rmotor.run_forever(speed_sp=500)
-	time.sleep(0.9)
+	rmotor.run_forever(speed_sp=2000)
+	time.sleep(0.4)
 	#goForward
-	lmotor.run_forever(speed_sp=500)
-	rmotor.run_forever(speed_sp=500)
-	time.sleep(1.3)
+	lmotor.run_forever(speed_sp=2000)
+	rmotor.run_forever(speed_sp=2000)
+	time.sleep(0.9)
 	#turnRight
 	lmotor.run_forever(speed_sp=0)
-	rmotor.run_forever(speed_sp=500)
-	time.sleep(0.8)
+	rmotor.run_forever(speed_sp=2000)
+	time.sleep(0.5)
 	#goForward
 	lmotor.run_forever(speed_sp=500)
 	rmotor.run_forever(speed_sp=500)
-	time.sleep(0.7)
+	while (a1*ls.value()/a2+b)>black:
+		time.sleep(0.001)
 	
 	#turnLeft
-	lmotor.run_forever(speed_sp=500)
-	rmotor.run_forever(speed_sp=-500)
-	time.sleep(0.4)
+	lmotor.run_forever(speed_sp=2000)
+	rmotor.run_forever(speed_sp=0)
+	time.sleep(0.2)
 
 print("Nasz FTL")
 #white = calculate()
@@ -192,7 +196,7 @@ differ = 0
 lsV=0
 csV=0
 while not ts.value():
-	if ir.value()<5:
+	if ir.value()<7:
 		obstacle()
 	correction = countCorrection()
 	#print("%s, %s" %(error, correction))
